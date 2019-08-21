@@ -1,22 +1,6 @@
 class Model {
   constructor() {
-    this.todos = [
-      {
-        id: 1,
-        text: '잠자기',
-        complete: false
-      },
-      {
-        id: 2,
-        text: '청소하기',
-        complete: false
-      },
-      {
-        id: 3,
-        text: '씻기',
-        complete: true
-      }
-    ];
+    this.todos = JSON.parse(localStorage.getItem('todos')) || [];
   }
 
   addTodo(todoText) {
@@ -27,22 +11,34 @@ class Model {
     };
 
     this.todos.push(todo);
-  }
 
-  editTodo(id, editText) {
-    this.todos = this.todos.map(todo => {
-      todo.id === id ? {id: todo.id, text: editText, complete: todo.complete} : todo
-    });
+    // this.onTodoListChanged(this.todos);
+    this._commit(this.todos);
   }
 
   deleteTodo(id) {
     this.todos = this.todos.filter(todo => todo.id !== id);
+
+    // this.onTodoListChanged(this.todos);
+    this._commit(this.todos);
   }
 
   toggleTodo(id) {
-    this.todos = this.todos.map(todo => {
+    this.todos = this.todos.map(todo => 
       todo.id === id ? {id: todo.id, text: todo.text, complete: !todo.complete} : todo
-    });
+    );
+
+    // this.onTodoListChanged(this.todos);
+    this._commit(this.todos);
+  }
+
+  bindTodoListChanged(callback) {
+    this.onTodoListChanged = callback;
+  }
+
+  _commit(todos) {
+    this.onTodoListChanged(todos);
+    localStorage.setItem('todos', JSON.stringify(todos));
   }
 }
 
@@ -93,11 +89,12 @@ class View {
   }
 
   displayTodos(todos) {
+    // debugger;
     while(this.todoList.firstChild) {
       this.todoList.removeChild(this.todoList.firstChild);
     }
 
-    if(!todos.length) {
+    if(todos.length === 0) {
       const p = this.createElement('p');
       p.textContent = 'Empty Todo!!';
       this.todoList.append(p);
@@ -153,6 +150,7 @@ class View {
   }
 
   bindToggleTodo(handler) {
+    // debugger;
     this.todoList.addEventListener('change', e => {
       if(e.target.type === 'checkbox') {
         const id = Number(e.target.parentElement.id);
@@ -168,10 +166,13 @@ class Controller {
     this.model = model;
     this.view = view;
 
-    this.onTodoListChanged(this.model.todos);
+    // debugger;
+    this.model.bindTodoListChanged(this.onTodoListChanged);
     this.view.bindAddTodo(this.handleAddTodo);
     this.view.bindDeleteTodo(this.handleDeleteTodo);
     this.view.bindToggleTodo(this.handleToggleTodo);
+
+    this.onTodoListChanged(this.model.todos);
   }
 
   onTodoListChanged = todos => {
@@ -189,8 +190,6 @@ class Controller {
   handleToggleTodo = id => {
     this.model.toggleTodo(id);
   }
-
-  
 }
 
 const app = new Controller(new Model(), new View());
