@@ -97,7 +97,7 @@ class View {
       this.todoList.removeChild(this.todoList.firstChild);
     }
 
-    if(todos.length === 0) {
+    if(!todos.length) {
       const p = this.createElement('p');
       p.textContent = 'Empty Todo!!';
       this.todoList.append(p);
@@ -130,13 +130,67 @@ class View {
       })
     }
   }
+
+  bindAddTodo(handler) {
+    this.form.addEventListener('submit', e => {
+      e.preventDefault();
+
+      if(this._todoText) {
+        handler(this._todoText);
+        this._resetInput();
+      }
+    });
+  }
+
+  bindDeleteTodo(handler) {
+    this.todoList.addEventListener('click', e => {
+      if(e.target.className === 'delete') {
+        const id = Number(e.target.parentElement.id);
+
+        handler(id);
+      }
+    })
+  }
+
+  bindToggleTodo(handler) {
+    this.todoList.addEventListener('change', e => {
+      if(e.target.type === 'checkbox') {
+        const id = Number(e.target.parentElement.id);
+
+        handler(id);
+      }
+    })
+  }
 }
 
 class Controller {
   constructor(model, view) {
     this.model = model;
     this.view = view;
+
+    this.onTodoListChanged(this.model.todos);
+    this.view.bindAddTodo(this.handleAddTodo);
+    this.view.bindDeleteTodo(this.handleDeleteTodo);
+    this.view.bindToggleTodo(this.handleToggleTodo);
   }
+
+  onTodoListChanged = todos => {
+    this.view.displayTodos(todos);
+  }
+
+  handleAddTodo = todoText => {
+    this.model.addTodo(todoText);
+  }
+
+  handleDeleteTodo = id => {
+    this.model.deleteTodo(id);
+  }
+
+  handleToggleTodo = id => {
+    this.model.toggleTodo(id);
+  }
+
+  
 }
 
 const app = new Controller(new Model(), new View());
