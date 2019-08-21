@@ -1,2 +1,16 @@
-# mvc_todo
-MVC패턴으로 만들어보는 TODO APP with ONLY vanilla javascript
+<h1 align="center">Welcome to mvc_todo 👋</h1>
+<p>
+</p>
+
+## Install
+
+```sh
+npm install
+```
+
+## Show your support
+
+Give a ⭐️ if this project helped you!
+
+***
+_This README was generated with ❤️ by [readme-md-generator](https://github.com/kefranabg/readme-md-generator)_
